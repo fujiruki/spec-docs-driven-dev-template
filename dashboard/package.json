@@ -1,0 +1,21 @@
+{
+  "name": "sdd-dashboard",
+  "version": "0.1.0",
+  "description": "仕様書駆動開発の進捗ダッシュボードCLI",
+  "type": "module",
+  "bin": {
+    "sdd-dashboard": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
