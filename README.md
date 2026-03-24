@@ -34,29 +34,48 @@
 
 ## クイックスタート
 
-### 方法1: GitHub Template（推奨）
+### 方法1: AIにセットアップしてもらう（推奨）
+
+```bash
+git clone https://github.com/fujiruki/spec-driven-dev.git
+```
+
+クローンしたディレクトリで Claude Code を起動すると、AIが「SdDDセットアップしましょうか？」と提案します。
+対象プロジェクトを指定するだけで、CLAUDE.md・仕様書テンプレート・コマンド群を自動配置します。
+
+既存のプロジェクトに導入する場合も、既存の CLAUDE.md への追記や既存ドキュメントの仕様書への取り込みをAIが対話しながら進めます。
+
+```
+AI: 「SdDDを別のプロジェクトにセットアップしますか？」
+あなた: 「/path/to/my-project にお願い」
+AI: 「既存のCLAUDE.mdがありますね。SdDDルールを追記しますか？」
+あなた: 「追記して」
+AI: 「README.mdと旧仕様.mdがあります。仕様書に取り込みましょうか？」
+あなた: 「お願い」
+AI: 「セットアップ完了。/sddd で開発を始められます」
+```
+
+### 方法2: GitHub Template
 
 ```bash
 gh repo create my-project --template fujiruki/spec-driven-dev
 cd my-project
 ```
 
-これだけ。仕様書テンプレート・CLAUDE.md・スラッシュコマンドが全部揃った状態で始められます。
+仕様書テンプレート・CLAUDE.md・スラッシュコマンドが全部揃った状態で始められます。
 
-### 方法2: 既存プロジェクトに導入
+### 方法3: 手動で導入
 
 ```bash
-# このリポジトリをクローン
 git clone https://github.com/fujiruki/spec-driven-dev.git
 
-# テンプレートをあなたのプロジェクトにコピー
 cp spec-driven-dev/templates/CLAUDE.md /path/to/your-project/
 cp spec-driven-dev/templates/task.md /path/to/your-project/
 cp -r spec-driven-dev/templates/docs/ /path/to/your-project/docs/
 cp -r spec-driven-dev/templates/.claude/ /path/to/your-project/.claude/
 ```
 
-### 方法3: 段階的に導入
+### 方法4: 段階的に導入
 
 一気に全部入れなくてOK。詳しくは [導入ガイド](docs/07_導入ガイド.md) を参照。
 
@@ -69,7 +88,6 @@ cp -r spec-driven-dev/templates/.claude/ /path/to/your-project/.claude/
 進捗ダッシュボードを使うと、Agentの作業状況をリアルタイムで確認できます。
 
 ```bash
-# このリポジトリの dashboard ディレクトリで実行
 cd spec-docs-driven-dev-template/dashboard
 npm install && npm run build && npm link
 
@@ -108,8 +126,9 @@ templates/
 │       ├── 04_データ設計.md
 │       ├── 05_技術設計.md
 │       └── 06_変更履歴.md
-├── .claude/commands/       ← スラッシュコマンド（11個 + ガイド）
+├── .claude/commands/       ← スラッシュコマンド（12個 + ガイド）
 │   ├── sddd.md            ← SdDD開始ガイド（/sddd で呼び出し）
+│   ├── sddd-setup.md      ← SdDD環境セットアップ（/sddd-setup で呼び出し）
 │   ├── spec-sync.md       ← 要望→仕様書反映
 │   ├── debug.md           ← エラーの根本原因追求
 │   ├── kaigi.md           ← AI専門家会議
@@ -134,6 +153,7 @@ Claude Code で使えるコマンドが付属しています。
 | コマンド | 用途 |
 |---------|------|
 | `/sddd` | SdDD開始ガイドを表示（最初にこれを実行） |
+| `/sddd-setup` | 対象プロジェクトにSdDD環境を自動セットアップ |
 | `/spec-sync` | 要望を仕様書に反映する |
 | `/debug` | エラー修正（根本原因追求・対症療法禁止） |
 | `/kaigi` | AI専門家会議（4名の専門家が3ラウンドで議論） |

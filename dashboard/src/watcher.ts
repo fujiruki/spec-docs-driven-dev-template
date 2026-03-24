@@ -10,14 +10,17 @@ export function watchTaskFile(
 ): FileWatcher {
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-  watchFile(filePath, { interval: 60000 }, () => {
+  watchFile(filePath, { interval: 5000 }, () => {
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(onChange, 100);
   });
 
+  const autoRefresh = setInterval(onChange, 60000);
+
   return {
     close() {
       unwatchFile(filePath);
+      clearInterval(autoRefresh);
       if (debounceTimer) clearTimeout(debounceTimer);
     },
   };

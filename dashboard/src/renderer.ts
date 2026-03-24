@@ -225,7 +225,7 @@ export function render(state: DashboardState, mode: DisplayMode, expandedSection
 
   const modeIndicator = mode === 1 ? chalk.underline('1') : '1';
   const modeIndicator2 = mode === 2 ? chalk.underline('2') : '2';
-  output.push(` [${modeIndicator}] 1列表示  [${modeIndicator2}] 2列表示  [e] 展開/折畳  [${chalk.red('q')}] 終了`);
+  output.push(` [${modeIndicator}] 1列表示  [${modeIndicator2}] 2列表示  [e] 展開/折畳  [r] 更新  [${chalk.red('q')}] 終了`);
 
   output.push('\x1b[?25h');
 

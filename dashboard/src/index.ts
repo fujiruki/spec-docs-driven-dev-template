@@ -97,6 +97,9 @@ function main() {
       currentMode = 2;
       draw();
     }
+    if (key === 'r') {
+      draw();
+    }
     if (key === 'e') {
       const state = parseTaskFile(watchPath);
       const completedColumns = state.columns.filter(isColumnCompleted);
