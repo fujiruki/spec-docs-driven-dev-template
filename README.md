@@ -34,22 +34,21 @@
 
 ## クイックスタート
 
-### 方法1: AIにセットアップしてもらう（推奨）
+### 方法1: `/sddd-setup` コマンド（推奨）
 
 ```bash
 git clone https://github.com/fujiruki/spec-driven-dev.git
+cd spec-driven-dev
 ```
 
-クローンしたディレクトリで Claude Code を起動すると、AIが「SdDDセットアップしましょうか？」と提案します。
-対象プロジェクトを指定するだけで、CLAUDE.md・仕様書テンプレート・コマンド群を自動配置します。
-
-既存のプロジェクトに導入する場合も、既存の CLAUDE.md への追記や既存ドキュメントの仕様書への取り込みをAIが対話しながら進めます。
+Claude Code を起動して `/sddd-setup` を実行するだけ。対話形式でセットアップが進みます。
 
 ```
-AI: 「SdDDを別のプロジェクトにセットアップしますか？」
-あなた: 「/path/to/my-project にお願い」
-AI: 「既存のCLAUDE.mdがありますね。SdDDルールを追記しますか？」
-あなた: 「追記して」
+あなた: /sddd-setup
+AI: 「対象プロジェクトのパスを教えてください」
+あなた: 「/path/to/my-project」
+AI: 「CLAUDE.mdの導入方式を選んでください。【A】参照方式 【B】直接記載方式」
+あなた: 「A」
 AI: 「README.mdと旧仕様.mdがあります。仕様書に取り込みましょうか？」
 あなた: 「お願い」
 AI: 「セットアップ完了。/sddd で開発を始められます」
