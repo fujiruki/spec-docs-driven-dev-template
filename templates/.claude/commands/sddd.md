@@ -8,14 +8,18 @@
 
 ## ダッシュボード
 
-実装が始まったら、別のターミナルで進捗ダッシュボードを表示できます：
+実装が始まったら、**別のターミナル**で進捗ダッシュボードを表示できます：
 
 ```bash
-cd C:\Fujiruki\Projects\仕様書駆動開発\dashboard
-node dist/index.js --watch "プロジェクトパス/task.md"
+sdd-dashboard task.md
 ```
 
-`task.md` のタスクがリアルタイムで更新されます。
+Agentが `task.md` を更新するたびにリアルタイムで画面が変わります。
+
+> 初回セットアップ（まだの場合）:
+> ```bash
+> cd C:\Fujiruki\Projects\仕様書駆動開発\dashboard && npm install && npm run build && npm link
+> ```
 
 ## 主要コマンド
 
