@@ -39,9 +39,35 @@ function horizontalLine(width: number, left: string, mid: string, right: string,
   return line;
 }
 
-function padOrTruncate(text: string, width: number): string {
+function charWidth(ch: string): number {
+  const code = ch.codePointAt(0) || 0;
+  if (
+    (code >= 0x1100 && code <= 0x115F) ||
+    (code >= 0x2E80 && code <= 0x303E) ||
+    (code >= 0x3040 && code <= 0x33BF) ||
+    (code >= 0x3400 && code <= 0x4DBF) ||
+    (code >= 0x4E00 && code <= 0xA4CF) ||
+    (code >= 0xA960 && code <= 0xA97C) ||
+    (code >= 0xAC00 && code <= 0xD7FB) ||
+    (code >= 0xF900 && code <= 0xFAFF) ||
+    (code >= 0xFE30 && code <= 0xFE6F) ||
+    (code >= 0xFF01 && code <= 0xFF60) ||
+    (code >= 0xFFE0 && code <= 0xFFE6) ||
+    (code >= 0x20000 && code <= 0x2FFFD) ||
+    (code >= 0x30000 && code <= 0x3FFFD)
+  ) return 2;
+  return 1;
+}
+
+function displayWidth(text: string): number {
   const stripped = text.replace(/\x1b\[[0-9;]*m/g, '');
-  const len = [...stripped].length;
+  let w = 0;
+  for (const ch of stripped) w += charWidth(ch);
+  return w;
+}
+
+function padOrTruncate(text: string, width: number): string {
+  const len = displayWidth(text);
   if (len >= width) {
     let count = 0;
     let result = '';
@@ -49,9 +75,10 @@ function padOrTruncate(text: string, width: number): string {
     for (const ch of text) {
       if (ch === '\x1b') { inEsc = true; result += ch; continue; }
       if (inEsc) { result += ch; if (ch === 'm') inEsc = false; continue; }
-      if (count >= width - 1) { result += '…'; break; }
+      const cw = charWidth(ch);
+      if (count + cw > width - 1) { result += '…'; break; }
       result += ch;
-      count++;
+      count += cw;
     }
     return result;
   }
@@ -108,7 +135,6 @@ function renderColumns(columns: AgentColumn[], totalWidth: number, mode: Display
   for (let i = 1; i < colCount; i++) {
     divPositions.push(i * colWidth);
   }
-  divPositions.push(innerWidth);
   lines.push(horizontalLine(totalWidth, '├', '┼', '┤', divPositions));
 
   const maxTasks = Math.max(...columns.map(c => c.tasks.length), 0);
