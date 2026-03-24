@@ -10,8 +10,7 @@ export function watchTaskFile(
 ): FileWatcher {
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-  watchFile(filePath, { interval: 1000 }, (curr, prev) => {
-    if (curr.mtimeMs === prev.mtimeMs) return;
+  watchFile(filePath, { interval: 60000 }, () => {
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(onChange, 100);
   });
