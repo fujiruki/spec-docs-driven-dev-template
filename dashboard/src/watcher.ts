@@ -1,15 +1,25 @@
-import { watch, type FSWatcher } from 'fs';
+import { watchFile, unwatchFile, type StatWatcher } from 'fs';
+
+export interface FileWatcher {
+  close(): void;
+}
 
 export function watchTaskFile(
   filePath: string,
   onChange: () => void,
-): FSWatcher {
+): FileWatcher {
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-  const watcher = watch(filePath, () => {
+  watchFile(filePath, { interval: 1000 }, (curr, prev) => {
+    if (curr.mtimeMs === prev.mtimeMs) return;
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(onChange, 100);
   });
 
-  return watcher;
+  return {
+    close() {
+      unwatchFile(filePath);
+      if (debounceTimer) clearTimeout(debounceTimer);
+    },
+  };
 }
