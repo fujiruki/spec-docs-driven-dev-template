@@ -1,4 +1,4 @@
-# 仕様書駆動開発（Spec-Driven Development）
+# 仕様書駆動開発 — Spec-docs Driven Development (SdDD)
 
 **「こうしたい」と言うだけで、AIが仕様書を管理しながら開発する体制。**
 
@@ -51,6 +51,7 @@ git clone https://github.com/fujiruki/spec-driven-dev.git
 
 # テンプレートをあなたのプロジェクトにコピー
 cp spec-driven-dev/templates/CLAUDE.md /path/to/your-project/
+cp spec-driven-dev/templates/task.md /path/to/your-project/
 cp -r spec-driven-dev/templates/docs/ /path/to/your-project/docs/
 cp -r spec-driven-dev/templates/.claude/ /path/to/your-project/.claude/
 ```
@@ -58,6 +59,23 @@ cp -r spec-driven-dev/templates/.claude/ /path/to/your-project/.claude/
 ### 方法3: 段階的に導入
 
 一気に全部入れなくてOK。詳しくは [導入ガイド](docs/07_導入ガイド.md) を参照。
+
+### 導入後の開始方法
+
+テンプレートの配置が済んだら、Claude Code で `/sddd` を実行するだけで開発を始められます。
+
+### ダッシュボードのセットアップ（任意）
+
+進捗ダッシュボードを使うと、Agentの作業状況をリアルタイムで確認できます。
+
+```bash
+# このリポジトリの dashboard ディレクトリで実行
+cd spec-docs-driven-dev-template/dashboard
+npm install && npm run build && npm link
+
+# プロジェクトディレクトリで、別のターミナルから起動
+sdd-dashboard task.md
+```
 
 ## 人間がやること
 
@@ -78,6 +96,7 @@ cp -r spec-driven-dev/templates/.claude/ /path/to/your-project/.claude/
 ```
 templates/
 ├── CLAUDE.md              ← 指揮AIのルール（これが核心）
+├── task.md                ← タスク管理ファイル（ダッシュボード連携）
 ├── docs/
 │   ├── SPEC.md            ← 仕様の目次（AIが最初に読む）
 │   ├── requests.md        ← 人間が要望を書く場所
@@ -89,7 +108,8 @@ templates/
 │       ├── 04_データ設計.md
 │       ├── 05_技術設計.md
 │       └── 06_変更履歴.md
-├── .claude/commands/       ← スラッシュコマンド（11個）
+├── .claude/commands/       ← スラッシュコマンド（11個 + ガイド）
+│   ├── sddd.md            ← SdDD開始ガイド（/sddd で呼び出し）
 │   ├── spec-sync.md       ← 要望→仕様書反映
 │   ├── debug.md           ← エラーの根本原因追求
 │   ├── kaigi.md           ← AI専門家会議
@@ -105,12 +125,15 @@ templates/
     └── TEMPLATE.md        ← Agent引き継ぎ用テンプレート
 ```
 
+`task.md` は進捗ダッシュボード（`sdd-dashboard`）と連携するタスク管理ファイルです。Agentがタスクの完了チェックを入れると、ダッシュボードにリアルタイムで反映されます。
+
 ## スラッシュコマンド
 
 Claude Code で使えるコマンドが付属しています。
 
 | コマンド | 用途 |
 |---------|------|
+| `/sddd` | SdDD開始ガイドを表示（最初にこれを実行） |
 | `/spec-sync` | 要望を仕様書に反映する |
 | `/debug` | エラー修正（根本原因追求・対症療法禁止） |
 | `/kaigi` | AI専門家会議（4名の専門家が3ラウンドで議論） |
