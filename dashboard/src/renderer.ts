@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import { DashboardState, Task, AgentColumn } from './types.js';
+import { isColumnCompleted } from './parser.js';
 
 type DisplayMode = 1 | 2;
 
@@ -103,12 +104,22 @@ function progressBar(ratio: number, width: number): string {
   return chalk.green('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
 }
 
-function renderColumns(columns: AgentColumn[], totalWidth: number, mode: DisplayMode): string[] {
+function renderColumns(columns: AgentColumn[], totalWidth: number, mode: DisplayMode, expandedSections?: Set<string>): string[] {
   const lines: string[] = [];
   const colCount = columns.length;
 
   if (mode === 1 || colCount === 0) {
     for (const col of columns) {
+      const completed = isColumnCompleted(col);
+      const forceExpanded = expandedSections?.has(col.name);
+
+      if (completed && !forceExpanded) {
+        const count = col.tasks.length;
+        lines.push(`  ${chalk.green('✓')} ${chalk.dim(col.name)} ${chalk.green(`(${count}/${count}完了)`)}`);
+        lines.push('');
+        continue;
+      }
+
       const roleLabel = col.role === 'commander' ? chalk.cyan('(指揮)') : '';
       lines.push(`  ${chalk.bold(col.name)} ${roleLabel}`);
       lines.push('  ' + '─'.repeat(Math.min(30, totalWidth - 4)));
@@ -125,8 +136,15 @@ function renderColumns(columns: AgentColumn[], totalWidth: number, mode: Display
 
   const headerParts: string[] = [];
   for (const col of columns) {
+    const completed = isColumnCompleted(col);
+    const forceExpanded = expandedSections?.has(col.name);
     const roleLabel = col.role === 'commander' ? ' (指揮)' : '';
-    const header = `${col.name}${roleLabel}`;
+    let header: string;
+    if (completed && !forceExpanded) {
+      header = `✓ ${col.name} (${col.tasks.length}/${col.tasks.length}完了)`;
+    } else {
+      header = `${col.name}${roleLabel}`;
+    }
     headerParts.push(padOrTruncate(header, colWidth - 1));
   }
   lines.push('│' + headerParts.join('│') + '│');
@@ -137,11 +155,18 @@ function renderColumns(columns: AgentColumn[], totalWidth: number, mode: Display
   }
   lines.push(horizontalLine(totalWidth, '├', '┼', '┤', divPositions));
 
-  const maxTasks = Math.max(...columns.map(c => c.tasks.length), 0);
+  const effectiveColumns = columns.map(col => {
+    const completed = isColumnCompleted(col);
+    const forceExpanded = expandedSections?.has(col.name);
+    if (completed && !forceExpanded) return [];
+    return col.tasks;
+  });
+
+  const maxTasks = Math.max(...effectiveColumns.map(t => t.length), 0);
   for (let row = 0; row < maxTasks; row++) {
     const parts: string[] = [];
-    for (const col of columns) {
-      const task = col.tasks[row];
+    for (const tasks of effectiveColumns) {
+      const task = tasks[row];
       const text = task ? ` ${taskLine(task)}` : '';
       parts.push(padOrTruncate(text, colWidth - 1));
     }
@@ -151,7 +176,7 @@ function renderColumns(columns: AgentColumn[], totalWidth: number, mode: Display
   return lines;
 }
 
-export function render(state: DashboardState, mode: DisplayMode): string {
+export function render(state: DashboardState, mode: DisplayMode, expandedSections?: Set<string>): string {
   const termWidth = Math.max(process.stdout.columns || 80, 40);
   const width = Math.min(termWidth, 120);
   const output: string[] = [];
@@ -173,7 +198,7 @@ export function render(state: DashboardState, mode: DisplayMode): string {
 
   output.push(horizontalLine(width, '├', '─', '┤'));
 
-  const columnLines = renderColumns(state.columns, width, mode);
+  const columnLines = renderColumns(state.columns, width, mode, expandedSections);
   for (const line of columnLines) {
     if (mode === 2 && (line.startsWith('│') || line.startsWith('├'))) {
       output.push(line);
@@ -200,7 +225,7 @@ export function render(state: DashboardState, mode: DisplayMode): string {
 
   const modeIndicator = mode === 1 ? chalk.underline('1') : '1';
   const modeIndicator2 = mode === 2 ? chalk.underline('2') : '2';
-  output.push(` [${modeIndicator}] 1列表示  [${modeIndicator2}] 2列表示  [${chalk.red('q')}] 終了`);
+  output.push(` [${modeIndicator}] 1列表示  [${modeIndicator2}] 2列表示  [e] 展開/折畳  [${chalk.red('q')}] 終了`);
 
   output.push('\x1b[?25h');
 

@@ -20,8 +20,11 @@ function parseTaskStatus(line: string): { name: string; status: TaskStatus } | n
   return { name, status };
 }
 
-export function parseTaskFile(filePath: string): DashboardState {
-  const content = readFileSync(filePath, 'utf-8');
+export function isColumnCompleted(column: AgentColumn): boolean {
+  return column.tasks.length > 0 && column.tasks.every(t => t.status === 'done');
+}
+
+export function parseTaskContent(content: string): DashboardState {
   const lines = content.split('\n');
 
   let projectName = '仕様書駆動開発';
@@ -63,4 +66,9 @@ export function parseTaskFile(filePath: string): DashboardState {
     lastUpdated: new Date(),
     columns,
   };
+}
+
+export function parseTaskFile(filePath: string): DashboardState {
+  const content = readFileSync(filePath, 'utf-8');
+  return parseTaskContent(content);
 }

@@ -4,16 +4,21 @@ import { resolve } from 'path';
 import { parseTaskFile } from './parser.js';
 import { watchTaskFile } from './watcher.js';
 import { render } from './renderer.js';
+import { resetTaskFile } from './reset.js';
+import { isColumnCompleted } from './parser.js';
 
 type DisplayMode = 1 | 2;
 
-function parseArgs(): { watchPath: string; mode: DisplayMode } {
+function parseArgs(): { watchPath: string; mode: DisplayMode; reset: boolean } {
   const args = process.argv.slice(2);
   let watchPath = '';
   let mode: DisplayMode | 'auto' = 'auto';
+  let reset = false;
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--watch' && args[i + 1]) {
+    if (args[i] === '--reset') {
+      reset = true;
+    } else if (args[i] === '--watch' && args[i + 1]) {
       watchPath = args[++i];
     } else if (args[i] === '--columns' && args[i + 1]) {
       const val = args[++i];
@@ -37,23 +42,31 @@ function parseArgs(): { watchPath: string; mode: DisplayMode } {
     resolvedMode = mode;
   }
 
-  return { watchPath, mode: resolvedMode };
+  return { watchPath, mode: resolvedMode, reset };
 }
 
 function main() {
-  const { watchPath, mode: initialMode } = parseArgs();
+  const { watchPath, mode: initialMode, reset } = parseArgs();
 
   if (!existsSync(watchPath)) {
     console.error(`エラー: ファイルが見つかりません: ${watchPath}`);
     process.exit(1);
   }
 
+  if (reset) {
+    resetTaskFile(watchPath);
+    console.log(`✓ 完了済みセクションを削除しました: ${watchPath}`);
+    console.log(`  バックアップ: ${watchPath}.bak`);
+    process.exit(0);
+  }
+
   let currentMode: DisplayMode = initialMode;
+  const expandedSections = new Set<string>();
 
   function draw() {
     try {
       const state = parseTaskFile(watchPath);
-      const output = render(state, currentMode);
+      const output = render(state, currentMode, expandedSections);
       process.stdout.write(output);
     } catch (e) {
       console.error('描画エラー:', e);
@@ -82,6 +95,23 @@ function main() {
     }
     if (key === '2') {
       currentMode = 2;
+      draw();
+    }
+    if (key === 'e') {
+      const state = parseTaskFile(watchPath);
+      const completedColumns = state.columns.filter(isColumnCompleted);
+      if (completedColumns.length === 0) return;
+
+      const allExpanded = completedColumns.every(c => expandedSections.has(c.name));
+      if (allExpanded) {
+        for (const col of completedColumns) {
+          expandedSections.delete(col.name);
+        }
+      } else {
+        for (const col of completedColumns) {
+          expandedSections.add(col.name);
+        }
+      }
       draw();
     }
   });
