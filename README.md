@@ -1,13 +1,16 @@
 # 仕様書駆動開発（Spec-Driven Development）
 
-**「こうしたい」と言うだけで、AIが勝手に作る開発体制。**
+**「こうしたい」と言うだけで、AIが仕様書を管理しながら開発する体制。**
 
-仕様書駆動開発は、AIに仕様書を管理させ、実装もAIに任せる開発スタイルです。
-人間がやることは3つだけ：
+セッションが切れても、AIが入れ替わっても、仕様書が全てを引き継ぐ。
+コードだけが残る開発から、**意図と経緯が残る開発**へ。
 
-1. **要望を伝える**（雑でいい）
-2. **確認に答える**（「Googleログインだけでいい」とか）
-3. **承認する**（「マージして」「デプロイして」）
+## 解決する問題
+
+- セッションが切れて、次のAIに一から説明し直し
+- 「前にこう言ったよね」が通じない
+- 後から仕様を変えたけど、どこにも記録が残ってない
+- 何を作ってるのか、自分でもわからなくなる
 
 ## 仕組み
 
@@ -28,13 +31,99 @@
 ```
 
 指揮AIと実装Agentを分けることで、AIが開発している間も会話が止まりません。
-思いついた瞬間に次の要望を伝えられます。
 
-## 前提ツール
+## クイックスタート
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code)（Agent機能を使用）
+### 方法1: GitHub Template（推奨）
 
-## はじめての方へ（読む順番）
+```bash
+gh repo create my-project --template fujiruki/spec-driven-dev
+cd my-project
+```
+
+これだけ。仕様書テンプレート・CLAUDE.md・スラッシュコマンドが全部揃った状態で始められます。
+
+### 方法2: 既存プロジェクトに導入
+
+```bash
+# このリポジトリをクローン
+git clone https://github.com/fujiruki/spec-driven-dev.git
+
+# テンプレートをあなたのプロジェクトにコピー
+cp spec-driven-dev/templates/CLAUDE.md /path/to/your-project/
+cp -r spec-driven-dev/templates/docs/ /path/to/your-project/docs/
+cp -r spec-driven-dev/templates/.claude/ /path/to/your-project/.claude/
+```
+
+### 方法3: 段階的に導入
+
+一気に全部入れなくてOK。詳しくは [導入ガイド](docs/07_導入ガイド.md) を参照。
+
+## 人間がやること
+
+1. **要望を書く** — `docs/requests.md` に「こういう機能ほしい」と書くだけ。雑でいい
+2. **確認に答える** — 「Googleログインだけでいい」とか
+3. **承認する** — 「マージして」「デプロイして」
+
+## AIがやること
+
+1. 要望を仕様書（`docs/spec/*.md`）に整理
+2. タスクに分解してAgent（バックグラウンド）に実装させる
+3. 完了報告・レビュー依頼
+4. 仕様変更があれば仕様書も自動更新
+5. 変更履歴に「いつ・何を・なぜ変えたか」を記録
+
+## テンプレートに含まれるもの
+
+```
+templates/
+├── CLAUDE.md              ← 指揮AIのルール（これが核心）
+├── docs/
+│   ├── SPEC.md            ← 仕様の目次（AIが最初に読む）
+│   ├── requests.md        ← 人間が要望を書く場所
+│   ├── request_log.md     ← リクエスト履歴（AIが管理）
+│   └── spec/
+│       ├── 01_概要.md
+│       ├── 02_機能仕様.md
+│       ├── 03_画面設計.md
+│       ├── 04_データ設計.md
+│       ├── 05_技術設計.md
+│       └── 06_変更履歴.md
+├── .claude/commands/       ← スラッシュコマンド（11個）
+│   ├── spec-sync.md       ← 要望→仕様書反映
+│   ├── debug.md           ← エラーの根本原因追求
+│   ├── kaigi.md           ← AI専門家会議
+│   ├── kakunin.md         ← 実装前に止まれ
+│   ├── keikaku.md         ← 設計に集中
+│   ├── minaoshi.md        ← 対策の見直し
+│   ├── sekkei.md          ← 詳細設計
+│   ├── siyousyo.md        ← 仕様書作成
+│   ├── soudan.md          ← 相談モード
+│   ├── teitai.md          ← 停滞分析
+│   └── wanna-make.md      ← やりたいこと計画
+└── handover/
+    └── TEMPLATE.md        ← Agent引き継ぎ用テンプレート
+```
+
+## スラッシュコマンド
+
+Claude Code で使えるコマンドが付属しています。
+
+| コマンド | 用途 |
+|---------|------|
+| `/spec-sync` | 要望を仕様書に反映する |
+| `/debug` | エラー修正（根本原因追求・対症療法禁止） |
+| `/kaigi` | AI専門家会議（4名の専門家が3ラウンドで議論） |
+| `/kakunin` | 実装前に止まって確認を求める |
+| `/keikaku` | 現状把握と設計に集中（実行しない） |
+| `/minaoshi` | 現在の対策を客観的に見直す |
+| `/sekkei` | 詳細設計・行動計画を策定 |
+| `/siyousyo` | AIが理解しやすい仕様書を作成 |
+| `/soudan` | 相談モード（コードに触らない） |
+| `/teitai` | 停滞の原因分析と再発防止 |
+| `/wanna-make` | やりたいことの計画（実装はまだ） |
+
+## ドキュメント
 
 ### まず概要をつかむ（10分）
 
@@ -45,48 +134,16 @@
 ### 実践する（15分）
 
 4. **[導入ガイド](docs/07_導入ガイド.md)** — 自分のプロジェクトに導入する手順
-5. **[templates/](templates/)** をプロジェクトにコピーして使い始める
 
 ### 深く理解する
 
-6. **[ワークフロー](docs/04_ワークフロー.md)** — 6フェーズの詳細
-7. **[Agent運用](docs/05_Agent運用.md)** — 並列Agent体制・劣化監視・引き継ぎ
-8. **[トークン節約](docs/06_トークン節約.md)** — 大規模プロジェクト向け
+5. **[ワークフロー](docs/04_ワークフロー.md)** — 6フェーズの詳細
+6. **[Agent運用](docs/05_Agent運用.md)** — 並列Agent体制・劣化監視・引き継ぎ
+7. **[トークン節約](docs/06_トークン節約.md)** — 大規模プロジェクト向け
 
-## クイックスタート
+## 前提ツール
 
-### 1. テンプレートをコピー
-
-```bash
-# あなたのプロジェクトに docs/ と CLAUDE.md をコピー
-cp -r templates/docs/ /path/to/your-project/docs/
-cp templates/CLAUDE.md /path/to/your-project/CLAUDE.md
-```
-
-### 2. CLAUDE.md を編集
-
-コピーした `CLAUDE.md` 内のプレースホルダーをプロジェクト情報に置き換えます。
-
-### 3. Claude Code を起動
-
-```bash
-cd /path/to/your-project
-claude
-```
-
-AIが `CLAUDE.md` を読み、仕様書駆動開発モードで動き始めます。
-
-## 進捗ダッシュボード
-
-バックグラウンドAgentの進捗をリアルタイムで可視化するCLIツールを同梱しています。
-
-```bash
-cd dashboard
-npm install
-npx sdd-dashboard --watch /path/to/your-project/task.md
-```
-
-詳細は [dashboard/README.md](dashboard/README.md) を参照。
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code)（Agent機能を使用）
 
 ## ライセンス
 
