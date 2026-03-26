@@ -208,9 +208,16 @@ export function render(state: DashboardState, mode: DisplayMode, expandedSection
     }
   }
 
+  if (state.completedCount > 0) {
+    const completedLine = `  ${chalk.green('✓')} 完了済みAgent: ${state.completedCount}個（すべてのタスク完了）`;
+    output.push(`│ ${padOrTruncate(completedLine, width - 4)} │`);
+  }
+
   output.push(horizontalLine(width, '├', '─', '┤'));
 
-  const { done, inProgress, todo, total } = countByStatus(state.columns);
+  const { done: activeDone, inProgress, todo, total: activeTotal } = countByStatus(state.columns);
+  const done = activeDone + state.completedTaskCount;
+  const total = activeTotal + state.completedTaskCount;
   const ratio = total > 0 ? done / total : 0;
   const percent = Math.round(ratio * 100);
 

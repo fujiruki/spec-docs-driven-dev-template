@@ -61,10 +61,25 @@ export function parseTaskContent(content: string): DashboardState {
     }
   }
 
+  const activeColumns: AgentColumn[] = [];
+  let completedCount = 0;
+  let completedTaskCount = 0;
+
+  for (const col of columns) {
+    if (isColumnCompleted(col) && col.role === 'agent') {
+      completedCount++;
+      completedTaskCount += col.tasks.length;
+    } else {
+      activeColumns.push(col);
+    }
+  }
+
   return {
     projectName,
     lastUpdated: new Date(),
-    columns,
+    columns: activeColumns,
+    completedCount,
+    completedTaskCount,
   };
 }
 

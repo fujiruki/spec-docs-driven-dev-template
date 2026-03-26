@@ -15,4 +15,6 @@ export interface DashboardState {
   projectName: string;
   lastUpdated: Date;
   columns: AgentColumn[];
+  completedCount: number;
+  completedTaskCount: number;
 }
