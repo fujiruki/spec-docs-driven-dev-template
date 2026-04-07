@@ -69,6 +69,7 @@ SdDDの必須ルールをどのCLAUDE.mdに追記しますか？
 - `soudan.md` — 相談モード
 - `teitai.md` — 停滞分析
 - `wanna-make.md` — やりたいこと計画
+- `sddd-update.md` — SdDDルールの最新版をプロジェクトに反映
 
 **既存の同名ファイルがある場合は上書きしてよいか確認する。**
 
