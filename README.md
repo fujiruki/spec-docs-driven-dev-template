@@ -1,191 +1,143 @@
-# 仕様書駆動開発 — Spec-docs Driven Development (SdDD)
+# SdDD — AIに読ませる開発手法・運用テンプレート
 
-**「こうしたい」と言うだけで、AIが仕様書を管理しながら開発する体制。**
+> **要望を書けば、仕様書になり、実装へ進む。**
 
-セッションが切れても、AIが入れ替わっても、仕様書が全てを引き継ぐ。
-コードだけが残る開発から、**意図と経緯が残る開発**へ。
+SdDD（Spec-docs Driven Development）は、AIに読ませる共通ルールとMarkdownテンプレートをプロジェクトへ入れ、要望 → 仕様 → タスク → 実装 → 検証を一つの記録として進める開発手法です。
 
-## 解決する問題
+利用者は、要望をファイルに書くかAIへ伝え、必要な判断に答えます。AI・自動化は、要望の記録、仕様化、タスク化、実装、検証、引継ぎを進めます。AIやセッションが交代しても、仕様と要望台帳に残った判断から再開できます。
 
-- セッションが切れて、次のAIに一から説明し直し
-- 「前にこう言ったよね」が通じない
-- 後から仕様を変えたけど、どこにも記録が残ってない
-- 何を作ってるのか、自分でもわからなくなる
+## AIに導入を任せる場合
 
-## 仕組み
+SdDD未導入のプロジェクトを操作できるAIへ、[INSTALL_WITH_AI.md](INSTALL_WITH_AI.md) を渡してください。AIが導入先を確認し、既存ファイルを既定で上書きせずにテンプレートを展開します。
 
-```
-あなた
-  │ 「こうしたい」を伝えるだけ
-  ▼
-指揮AI（コードを書かない。聞く・まとめる・渡す・報告する）
-  │
-  ├── 仕様書に整理（requests.md → spec/*.md）
-  │
-  ├── Agent-A（バックグラウンドで実装中）
-  │     機能完成後も生存 → デバッグも担当
-  │
-  ├── Agent-B（別の機能をバックグラウンドで実装中）
-  │
-  └── 完了報告 →「マージしていいですか？」
+```text
+このプロジェクトにSdDDを導入したいです。INSTALL_WITH_AI.md を最後まで読み、
+このプロジェクトを対象に安全に導入してください。既存ファイルは上書きしないでください。
 ```
 
-指揮AIと実装Agentを分けることで、AIが開発している間も会話が止まりません。
+## なぜSdDDか
 
-## クイックスタート
+通常のバイブコーディングでは、要望を伝えるたびにコードは変わっても、以前に残したかった仕様が消えたり、別の要望と衝突したりしがちです。
 
-### 方法1: `/sddd-setup` コマンド（推奨）
+SdDDは先に仕様を確定し、その仕様に沿って実装します。実装の前提・受け入れ条件・変更理由を要望IDで結ぶため、過去の要望を忘れず、実装漏れや仕様衝突を見つけやすくなります。
 
-```bash
-git clone https://github.com/fujiruki/spec-driven-dev.git
-cd spec-driven-dev
+```text
+利用者: 要望を書く / AIへ伝える / 判断に答える
+  ↓
+AI: 原文を requests.md に記録し、仕様を整理する
+  ↓ 仕様確定
+AI: requests_log.md・spec/・task.md を同じR-IDで更新する
+  ↓
+AI・実装担当: 仕様と受け入れ条件に沿って実装・検証する
+  ↓
+AI: 台帳に結果・根拠・次の判断を残す
 ```
 
-Claude Code を起動して `/sddd-setup` を実行するだけ。対話形式でセットアップが進みます。
+## これは何か
 
-```
-あなた: /sddd-setup
-AI: 「対象プロジェクトのパスを教えてください」
-あなた: 「/path/to/my-project」
-AI: 「CLAUDE.mdの導入方式を選んでください。【A】参照方式 【B】直接記載方式」
-あなた: 「A」
-AI: 「README.mdと旧仕様.mdがあります。仕様書に取り込みましょうか？」
-あなた: 「お願い」
-AI: 「セットアップ完了。/sddd で開発を始められます」
-```
+SdDDは、特定のAIやモデルに依存しない**開発手法**であり、AIに読ませる**運用ルールとテンプレート**のセットです。
 
-### 方法2: GitHub Template
+- `SDDD.md` — ツールに依存しない正本ルール
+- `AGENTS.md` / `CLAUDE.md` — 各AI環境に正本ルールを読ませるアダプター
+- `requests.md` / `requests_log.md` / `spec/` / `task.md` — 要望から実装までを残すMarkdownの正本
 
-```bash
-gh repo create my-project --template fujiruki/spec-driven-dev
-cd my-project
-```
+Claude Code向けコマンド、Codex、GitHub、CodeGraph、SQLite、HTMLダッシュボードは、環境に応じて使う補助機構です。
 
-仕様書テンプレート・CLAUDE.md・スラッシュコマンドが全部揃った状態で始められます。
+## 導入する
 
-### 方法3: 手動で導入
+このリポジトリは参照実装とテンプレート配布元です。新規・既存を問わず、利用するプロジェクトへインストーラーで展開します。既存の同名ファイルは、既定では上書きしません。
 
-```bash
-git clone https://github.com/fujiruki/spec-driven-dev.git
+PowerShell:
 
-cp spec-driven-dev/templates/CLAUDE.md /path/to/your-project/
-cp spec-driven-dev/templates/task.md /path/to/your-project/
-cp -r spec-driven-dev/templates/docs/ /path/to/your-project/docs/
-cp -r spec-driven-dev/templates/.claude/ /path/to/your-project/.claude/
+```powershell
+git clone https://github.com/fujiruki/spec-docs-driven-dev-template.git
+cd spec-docs-driven-dev-template
+.\scripts\install-sddd.ps1 -ProjectPath 'C:\Projects\my-app'
 ```
 
-### 方法4: 段階的に導入
+GitHubのIssue/PRテンプレートも入れる場合:
 
-一気に全部入れなくてOK。詳しくは [導入ガイド](docs/07_導入ガイド.md) を参照。
-
-### 導入後の開始方法
-
-テンプレートの配置が済んだら、Claude Code で `/sddd` を実行するだけで開発を始められます。
-
-### ダッシュボードのセットアップ（任意）
-
-進捗ダッシュボードを使うと、Agentの作業状況をリアルタイムで確認できます。
-
-```bash
-cd spec-docs-driven-dev-template/dashboard
-npm install && npm run build && npm link
-
-# プロジェクトディレクトリで、別のターミナルから起動
-sdd-dashboard task.md
+```powershell
+.\scripts\install-sddd.ps1 -ProjectPath 'C:\Projects\my-app' -WithGitHub
 ```
 
-## 人間がやること
+macOS/Linux:
 
-1. **要望を書く** — `docs/requests.md` に「こういう機能ほしい」と書くだけ。雑でいい
-2. **確認に答える** — 「Googleログインだけでいい」とか
-3. **承認する** — 「マージして」「デプロイして」
+```sh
+git clone https://github.com/fujiruki/spec-docs-driven-dev-template.git
+cd spec-docs-driven-dev-template
+./scripts/install-sddd.sh /path/to/my-app --with-github
+```
 
-## AIがやること
+導入後は、プロジェクトのAIに `SDDD.md` を読むよう伝えます。Claude Codeでは `/sddd` が、その読み込みとセッション開始を補助します。詳細は[導入ガイド](docs/07_導入ガイド.md)を参照してください。
 
-1. 要望を仕様書（`docs/spec/*.md`）に整理
-2. タスクに分解してAgent（バックグラウンド）に実装させる
-3. 完了報告・レビュー依頼
-4. 仕様変更があれば仕様書も自動更新
-5. 変更履歴に「いつ・何を・なぜ変えたか」を記録
+## 利用者とAIがすること
+
+| 利用者 | AI・自動化 |
+|:--|:--|
+| 要望を `docs/requests.md` に書く、またはAIへ伝える | 会話で受けた要望も、仕様の話を始める前に原文で記録する |
+| 仕様上の判断が必要な質問に答える | 仕様化を始める時にR-IDを採番し、仕様を整理する |
+| 結果確認、マージ、公開の承認をする | 仕様確定時に台帳・仕様・タスクを同じR-IDで更新する |
+|  | 実装・テスト・レビュー・引継ぎ・状態更新を進める |
+
+利用者が要望IDでファイルをつなぐ必要はありません。その記録と整合確認は、AI・自動化側の仕事です。
+
+## 要望のライフサイクル
+
+1. `requests.md` に、未整理の要望を原文で置く
+2. 仕様化を始める時に `R-0001` のような一意のIDを付ける
+3. 仕様が確定したら、`requests_log.md`・`spec/`・`SPEC.md`・`task.md` を更新する
+4. 記録を確認してから、該当の入力だけを `requests.md` から取り除く
+5. 実装中・検証中・完了・保留・見送り・取り下げ・他要望への統合を、同じ台帳記録に追記する
+
+IDは再利用しません。`他要望への統合` は別のR-IDへ統合する時だけの状態で、Gitのマージとは別です。統合先R-IDと理由を必ず残します。
 
 ## テンプレートに含まれるもの
 
-```
+```text
 templates/
-├── CLAUDE.md              ← 指揮AIのルール（これが核心）
-├── task.md                ← タスク管理ファイル（ダッシュボード連携）
+├── SDDD.md                 ← ツール非依存の正本ルール
+├── AGENTS.md               ← 汎用AI向けアダプター
+├── CLAUDE.md               ← Claude Code向けアダプター
+├── task.md                 ← 実装・検証計画
 ├── docs/
-│   ├── SPEC.md            ← 仕様の目次（AIが最初に読む）
-│   ├── requests.md        ← 人間が要望を書く場所
-│   ├── request_log.md     ← リクエスト履歴（AIが管理）
-│   └── spec/
-│       ├── 01_概要.md
-│       ├── 02_機能仕様.md
-│       ├── 03_画面設計.md
-│       ├── 04_データ設計.md
-│       ├── 05_技術設計.md
-│       └── 06_変更履歴.md
-├── .claude/commands/       ← スラッシュコマンド（12個 + ガイド）
-│   ├── sddd.md            ← SdDD開始ガイド（/sddd で呼び出し）
-│   ├── sddd-setup.md      ← SdDD環境セットアップ（/sddd-setup で呼び出し）
-│   ├── spec-sync.md       ← 要望→仕様書反映
-│   ├── debug.md           ← エラーの根本原因追求
-│   ├── kaigi.md           ← AI専門家会議
-│   ├── kakunin.md         ← 実装前に止まれ
-│   ├── keikaku.md         ← 設計に集中
-│   ├── minaoshi.md        ← 対策の見直し
-│   ├── sekkei.md          ← 詳細設計
-│   ├── siyousyo.md        ← 仕様書作成
-│   ├── soudan.md          ← 相談モード
-│   ├── teitai.md          ← 停滞分析
-│   └── wanna-make.md      ← やりたいこと計画
-└── handover/
-    └── TEMPLATE.md        ← Agent引き継ぎ用テンプレート
+│   ├── SPEC.md             ← 現在の仕様への入口
+│   ├── requests.md         ← 未整理・仕様確認中の要望
+│   ├── requests_log.md     ← 仕様確定後の全要望台帳
+│   ├── spec/               ← 現在有効な仕様
+│   ├── handover/           ← 担当交代時の再開記録
+│   ├── automation.md       ← 自動化・索引の方針
+│   └── collaboration.md    ← worktree・複数Agent・GitHub協業の方針
+├── .claude/commands/       ← Claude Code用の補助コマンド
+└── .github/                ← Issue / PRテンプレート（任意）
 ```
 
-`task.md` は進捗ダッシュボード（`sdd-dashboard`）と連携するタスク管理ファイルです。Agentがタスクの完了チェックを入れると、ダッシュボードにリアルタイムで反映されます。
+## 必要になった時だけ広げる
 
-## スラッシュコマンド
+| 課題 | SdDDで追加するもの |
+|:--|:--|
+| 台帳の検索・集計が重い | Markdownから再生成するSQLite索引 |
+| 人が状況を見づらい | Markdownから生成するHTML一覧・ダッシュボード |
+| 影響範囲が読みにくい | [CodeGraph](https://github.com/colbymchenry/codegraph) によるローカルのコード索引 |
+| 独立作業を並列に進めたい | 1要望ID / 1ブランチ / 1worktree / 1実装担当 |
+| 複数人で開発したい | 仕様確定後のIssue、PR、保護ブランチ |
 
-Claude Code で使えるコマンドが付属しています。
-
-| コマンド | 用途 |
-|---------|------|
-| `/sddd-setup` | グローバル環境にSdDDをセットアップ（最初に1回だけ実行） |
-| `/sddd` | プロジェクトでSdDD開発を開始（未導入なら初回セットアップも実行） |
-| `/spec-sync` | 要望を仕様書に反映する |
-| `/debug` | エラー修正（根本原因追求・対症療法禁止） |
-| `/kaigi` | AI専門家会議（4名の専門家が3ラウンドで議論） |
-| `/kakunin` | 実装前に止まって確認を求める |
-| `/keikaku` | 現状把握と設計に集中（実行しない） |
-| `/minaoshi` | 現在の対策を客観的に見直す |
-| `/sekkei` | 詳細設計・行動計画を策定 |
-| `/siyousyo` | AIが理解しやすい仕様書を作成 |
-| `/soudan` | 相談モード（コードに触らない） |
-| `/teitai` | 停滞の原因分析と再発防止 |
-| `/wanna-make` | やりたいことの計画（実装はまだ） |
+Markdownが正本です。SQLite、HTML、CodeGraphなどは、検索・表示・影響調査を助ける再生成可能な補助として使い、正本を勝手に上書きしません。
 
 ## ドキュメント
 
-### まず概要をつかむ（10分）
+1. [思想と原則](docs/01_思想と原則.md) — SdDDが守る不変条件
+2. [役割定義](docs/02_役割定義.md) — 利用者・指揮・実装・レビュー・統合の責務
+3. [フォルダ構成](docs/03_フォルダ構成.md) — 正本と補助データの境界
+4. [ワークフロー](docs/04_ワークフロー.md) — 要望から完了までの進め方
+5. [Agent運用](docs/05_Agent運用.md) — 指揮、実装、独立レビュー、引継ぎ
+6. [導入ガイド](docs/07_導入ガイド.md) — 新規・既存プロジェクトへの導入
+7. [運用自動化と索引](docs/08_運用自動化と索引.md) — SQLite、HTML、CodeGraph
+8. [並列・協業開発](docs/09_並列・協業開発.md) — worktree、複数Agent、GitHub
 
-1. **[思想と原則](docs/01_思想と原則.md)** — なぜこの手法なのか
-2. **[役割定義](docs/02_役割定義.md)** — 登場人物は3人だけ
-3. **[フォルダ構成](docs/03_フォルダ構成.md)** — プロジェクトに入れるファイル群
+## 公開範囲
 
-### 実践する（15分）
-
-4. **[導入ガイド](docs/07_導入ガイド.md)** — 自分のプロジェクトに導入する手順
-
-### 深く理解する
-
-5. **[ワークフロー](docs/04_ワークフロー.md)** — 6フェーズの詳細
-6. **[Agent運用](docs/05_Agent運用.md)** — 並列Agent体制・劣化監視・引き継ぎ
-7. **[トークン節約](docs/06_トークン節約.md)** — 大規模プロジェクト向け
-
-## 前提ツール
-
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code)（Agent機能を使用）
+`requests.md` と `requests_log.md` は通常Git管理されます。公開または外部共有するリポジトリには、パスワード、トークン、秘密鍵、個人情報、契約上の秘匿情報、生の会話原文を書かないでください。必要なら、安全な保管先を参照する公開可能な要約だけを残します。
 
 ## ライセンス
 

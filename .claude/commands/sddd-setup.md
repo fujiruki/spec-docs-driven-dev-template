@@ -1,108 +1,57 @@
-SdDD（仕様書駆動開発）をこのPCのClaude Code環境にグローバルセットアップします。
-これは1回だけ実行すれば十分です。以降、どのプロジェクトでも `/sddd` でSdDD開発を始められるようになります。
+# SdDDをプロジェクトへ導入する
 
-## 手順
+このリポジトリはSdDDの**参照実装とテンプレート配布元**である。ここ自身を利用者の開発プロジェクトとして扱わない。導入先を確認してから、既存ファイルを勝手に上書きしない。
 
-### Step 1: 現状スキャン
+## Step 1: 導入先を確認する
 
-以下を調べて報告する:
+発注者に次を確認する。
 
-- グローバル CLAUDE.md（`~/.claude/CLAUDE.md`）が存在するか、SdDDの記述が既にあるか
-- 作業ディレクトリの CLAUDE.md が存在するか、SdDDの記述が既にあるか
-- グローバルコマンド（`~/.claude/commands/`）にSdDD系コマンドが配置済みか
-- このリポジトリ（`spec-docs-driven-dev-template`）の絶対パスを特定する
+- 導入先プロジェクトの絶対パス（空の新規プロジェクトでも既存プロジェクトでもよい）
+- GitHubのIssue/PRテンプレートも入れるか
+- Claude Code用のアダプターとコマンドも入れるか（不要なら `-WithoutClaude`）
 
-### Step 2: CLAUDE.md の追記先を確認
+導入先がまだ無い場合は、先に空のディレクトリまたはGitリポジトリを作ってもらう。既存のプロジェクトでは、先にGitの状態を確認する。
 
-発注者に追記先を確認する:
+## Step 2: インストーラーを実行する
 
-```
-SdDDの必須ルールをどのCLAUDE.mdに追記しますか？
+このリポジトリのルートで、対象に応じて次を実行する。
 
-【A】グローバル CLAUDE.md（~/.claude/CLAUDE.md）
-  ✅ どのディレクトリでClaude Codeを起動しても常にSdDDルールが有効
-  ⚠️ SdDDを使わないプロジェクトでも読み込まれる
-
-【B】作業ディレクトリの CLAUDE.md（現在のディレクトリ）
-  ✅ このディレクトリから起動したときだけ有効
-  ✅ 他の環境に影響しない
-  ⚠️ 別のディレクトリから起動すると読まれない
+```powershell
+.\scripts\install-sddd.ps1 -ProjectPath 'C:\Projects\my-app'
 ```
 
-### Step 3: ハイブリッド方式で CLAUDE.md に追記
+Issue/PRテンプレートも使う時:
 
-選ばれた CLAUDE.md に以下を追記する（既にSdDD記述があればスキップ）。
-**追記前に発注者に内容を確認してもらう。許可なく書き込まない。**
-
-追記内容（ハイブリッド方式 = 最低限ルール直接記載 + 詳細は参照）:
-
-```markdown
-## SdDD 必須ルール
-
-* 指揮AIはコードを直接編集しない（バグ修正・デバッグ・「1行だけ」も例外なし）。実装はAgentに委譲する
-* 仕様未整理のまま実装に入らない
-* 仕様書を更新せずにコードだけ変えない
-* Agentの完了報告なくマージしない
-* `/sddd` でセッションを開始すると全ルールが有効になる
-* 詳細ルール: `<spec-docs-driven-dev-templateの絶対パス>/templates/CLAUDE.md`
+```powershell
+.\scripts\install-sddd.ps1 -ProjectPath 'C:\Projects\my-app' -WithGitHub
 ```
 
-**ポイント:**
-- 必須ルール（禁止事項）は直接記載 → `/sddd` 実行前でも常に有効
-- ワークフロー・Agent運用・ダッシュボード等の詳細は参照先に委譲 → CLAUDE.mdを汚さない
-- `/sddd` を実行すると参照先のフルルールが展開される
+macOS/Linux:
 
-### Step 4: グローバルコマンドの配置
-
-`~/.claude/commands/` に以下のコマンドをコピーする（既にあればスキップ）:
-
-コピー元: このリポジトリの `templates/.claude/commands/` から:
-- `sddd.md` — SdDD開発開始（プロジェクトごとのセットアップ含む）
-- `spec-sync.md` — 要望→仕様書反映
-- `debug.md` — エラー修正
-- `kaigi.md` — AI専門家会議
-- `kakunin.md` — 実装前に止まれ
-- `keikaku.md` — 設計に集中
-- `minaoshi.md` — 対策の見直し
-- `sekkei.md` — 詳細設計
-- `siyousyo.md` — 仕様書作成
-- `soudan.md` — 相談モード
-- `teitai.md` — 停滞分析
-- `wanna-make.md` — やりたいこと計画
-- `sddd-update.md` — SdDDルールの最新版をプロジェクトに反映
-
-**既存の同名ファイルがある場合は上書きしてよいか確認する。**
-
-### Step 5: ダッシュボードのセットアップ確認
-
-ダッシュボードCLI（`sdd-dashboard`）がインストール済みか確認する。
-未インストールなら以下を案内:
-
-```
-進捗ダッシュボード（任意）を使うと、Agentの作業状況をリアルタイムで確認できます。
-
-セットアップ:
-  cd <spec-docs-driven-dev-templateのパス>/dashboard
-  npm install && npm run build && npm link
+```sh
+./scripts/install-sddd.sh /path/to/my-app --with-github
 ```
 
-### Step 6: 完了報告
+同名ファイルがある場合、インストーラーは既定でスキップする。`-Overwrite` / `--overwrite` は、対象とバックアップ方針を発注者が確認した後だけ使う。
 
-```
-SdDDグローバルセットアップ完了しました。
+## Step 3: 導入結果を確認する
 
-配置したもの:
-- CLAUDE.md（SdDD必須ルール + 詳細参照を追記）
-- ~/.claude/commands/（SdDDコマンド群を配置）
+導入先に少なくとも次があることを確認する。
 
-使い方:
-- 任意のプロジェクトで /sddd を実行するとSdDD開発を開始できます
-- /sddd 実行前でも必須ルール（コード編集禁止等）は常に有効です
-- 初回は仕様書テンプレートの配置から対話で進みます
-```
+- `SDDD.md`（ツールに依存しない正本ルール）
+- `AGENTS.md`（汎用AI向けアダプター）
+- `docs/requests.md`、`docs/requests_log.md`、`docs/spec/`、`docs/SPEC.md`
+- `task.md` と `docs/handover/`
+- Claude Codeを選んだ場合は `CLAUDE.md` と `.claude/commands/`
 
-## 注意
+`.sddd/` と `.codegraph/` はローカルの再生成可能な補助データとして `.gitignore` に追加される。
 
-- 発注者の許可なくファイルを上書きしない
-- 既存のCLAUDE.mdの内容を削除しない
-- このコマンドはグローバル環境のセットアップのみ。プロジェクト個別のセットアップは `/sddd` が行う
+## Step 4: 利用を始める
+
+導入先でAIに `SDDD.md` を読むよう伝える。利用者は最初の要望を `docs/requests.md` に書くか、AIへ伝える。AIは先に入力へ記録し、仕様・要望台帳・タスクを順に整える。
+
+## 禁止事項
+
+- グローバルな `CLAUDE.md` へSdDDの規則を混ぜない
+- この参照リポジトリのテンプレートを、利用者の既存文書へ無確認で上書きしない
+- `requests_log.md` の履歴、R-ID、状態を初期化・再利用しない

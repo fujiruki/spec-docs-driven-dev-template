@@ -3,3 +3,7 @@ dist/
 *.log
 .DS_Store
 Thumbs.db
+
+# SdDD / CodeGraph local derived data
+.sddd/
+.codegraph/

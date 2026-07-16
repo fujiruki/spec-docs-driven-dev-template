@@ -1,5 +1,10 @@
 # [プロジェクト名] 仕様書マップ (SPEC.md)
 
+## 作業開始時の読み順
+
+1. 先にプロジェクト直下の [SDDD.md](../SDDD.md) を読み、要望・台帳・仕様の運用規則を確認する
+2. 次にこの `SPEC.md` を読み、今回の作業に関係する `spec/` だけを開く
+
 ## プロジェクト概要
 
 <!-- ここにシステムの概要を1-2行で記入 -->
@@ -23,8 +28,8 @@
 
 | ファイル | 役割 |
 |:--|:--|
-| [requests.md](requests.md) | 未対応の要望一覧（発注者が書く） |
-| [request_log.md](request_log.md) | 全リクエストの対応履歴（指揮AIが管理） |
+| [requests.md](requests.md) | 未整理・仕様確認中の要望入力箱 |
+| [requests_log.md](requests_log.md) | 仕様確定後の全要望台帳。原文・仕様・状態・結末を追う |
 
 ---
 
@@ -38,13 +43,18 @@
 
 ```
 [プロジェクト名]/
+├── SDDD.md              # ツール非依存の正本ルール
+├── AGENTS.md            # 汎用AI向けアダプター
+├── CLAUDE.md            # Claude Code向けアダプター（使う場合）
 ├── frontend/          # フロントエンド
 ├── api/               # バックエンド
 ├── docs/              # 仕様書群
 │   ├── SPEC.md        # ← このファイル（目次）
 │   ├── spec/          # コア仕様書
-│   ├── requests.md    # 未対応要望
-│   ├── request_log.md # 対応履歴
+│   ├── requests.md    # 未整理・仕様確認中の要望
+│   ├── requests_log.md # 仕様確定後の全要望台帳
+│   ├── automation.md  # 任意の自動化・索引の方針
+│   ├── collaboration.md # 任意の並列・協業の方針
 │   └── handover/      # Agent引き継ぎ資料
 └── ...
 ```
