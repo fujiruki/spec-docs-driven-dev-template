@@ -1,0 +1,39 @@
+name: Test SdDD CLI
+
+on:
+  push:
+    paths:
+      - "cli/**"
+      - "templates/**"
+      - ".github/workflows/test-cli.yml"
+  pull_request:
+    paths:
+      - "cli/**"
+      - "templates/**"
+      - ".github/workflows/test-cli.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Test CLI
+        working-directory: cli
+        run: npm test
+      - name: Validate distributed template
+        run: node cli/src/cli.mjs doctor templates
