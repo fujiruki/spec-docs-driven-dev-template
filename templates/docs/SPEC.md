@@ -46,6 +46,9 @@
 ├── SDDD.md              # ツール非依存の正本ルール
 ├── AGENTS.md            # 汎用AI向けアダプター
 ├── CLAUDE.md            # Claude Code向けアダプター（使う場合）
+├── .agents/skills/      # Codex向けSkill
+│   ├── kaigi/           # 軽量専門家会議
+│   └── kaigi2/          # 独立Agent専門家会議
 ├── frontend/          # フロントエンド
 ├── api/               # バックエンド
 ├── docs/              # 仕様書群

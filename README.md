@@ -26,7 +26,7 @@ SdDD未導入のプロジェクトを操作できるAIへ、[INSTALL_WITH_AI.md]
 最初に、現在のプロジェクトの SDDD.md、AGENTS.md、CLAUDE.md、docs/requests.md、
 docs/requests_log.md（または旧 request_log.md）、docs/spec/、task.md、引継書を読んでください。
 次に、最新版の参照リポジトリにある README.md、templates/SDDD.md、templates/AGENTS.md、
-templates/CLAUDE.md、templates/.claude/commands/、docs/07_導入ガイド.md を読んで、差分を整理してください。
+templates/CLAUDE.md、templates/.claude/commands/、.agents/skills/、docs/07_導入ガイド.md を読んで、差分を整理してください。
 
 以下のルールを守ってアップグレードしてください。
 - 既存の要望、要望台帳、仕様、タスク、引継書、プロジェクト固有の指示を消去・初期化・テンプレートで上書きしない
@@ -99,6 +99,36 @@ cd spec-docs-driven-dev-template
 
 導入後は、プロジェクトのAIに `SDDD.md` を読むよう伝えます。Claude Codeでは `/sddd` が、その読み込みとセッション開始を補助します。詳細は[導入ガイド](docs/07_導入ガイド.md)を参照してください。
 
+## 会議を使う
+
+インストーラーは、軽量な専門家会議と独立Agentを使う高品質会議を追加します。
+
+| 環境 | 軽量会議 | 高品質会議 |
+|:--|:--|:--|
+| Codex | `$kaigi` | `$kaigi2` |
+| Claude Code | `/kaigi` | `/kaigi2` |
+
+`kaigi` は単一コンテキスト内で複数の判断軸を演じるため低コストです。`kaigi2` は専門家を独立Agentとして実行し、相互批判と敵対的検証まで行います。
+
+## 構造を診断する
+
+`sddd doctor` preflight v0は、既存ファイルを書き換えず、SdDDプロジェクトの構造を診断します。
+
+```sh
+node cli/src/cli.mjs doctor /path/to/project
+node cli/src/cli.mjs doctor /path/to/project --format json
+```
+
+診断対象は、必須Markdown、ローカルリンク、R-ID形式・台帳重複、要望状態値です。`STRUCTURE PASS` は実装、テスト、仕様内容、セキュリティの正しさを保証しません。
+
+| 能力 | 状態 |
+|:--|:--|
+| `sddd doctor` 構造診断 | 実装済み（preflight v0） |
+| `$kaigi` / `$kaigi2`、`/kaigi` / `/kaigi2` | 実装済み |
+| `sddd context` | 文書上の候補・未実装 |
+| 汎用 `sddd verify` | 文書上の候補・未実装 |
+| `sddd dispatch` / Agent自動起動 | 文書上の候補・未実装 |
+
 ## 利用者とAIがすること
 
 | 利用者 | AI・自動化 |
@@ -120,10 +150,10 @@ cd spec-docs-driven-dev-template
 
 IDは再利用しません。`他要望への統合` は別のR-IDへ統合する時だけの状態で、Gitのマージとは別です。統合先R-IDと理由を必ず残します。
 
-## テンプレートに含まれるもの
+## 導入されるもの
 
 ```text
-templates/
+project/
 ├── SDDD.md                 ← ツール非依存の正本ルール
 ├── AGENTS.md               ← 汎用AI向けアダプター
 ├── CLAUDE.md               ← Claude Code向けアダプター
@@ -138,6 +168,10 @@ templates/
 │   └── collaboration.md    ← worktree・複数Agent・GitHub協業の方針
 ├── .claude/commands/       ← Claude Code用の補助コマンド
 └── .github/                ← Issue / PRテンプレート（任意）
+
+.agents/skills/
+├── kaigi/                   ← Codex用の軽量専門家会議
+└── kaigi2/                  ← Codex用の独立Agent専門家会議
 ```
 
 ## 必要になった時だけ広げる
@@ -149,6 +183,7 @@ templates/
 | 影響範囲が読みにくい | [CodeGraph](https://github.com/colbymchenry/codegraph) によるローカルのコード索引 |
 | 独立作業を並列に進めたい | 1要望ID / 1ブランチ / 1worktree / 1実装担当 |
 | 複数人で開発したい | 仕様確定後のIssue、PR、保護ブランチ |
+| SdDD構造の欠落を機械検査したい | 読み取り専用の `sddd doctor` |
 
 Markdownが正本です。SQLite、HTML、CodeGraphなどは、検索・表示・影響調査を助ける再生成可能な補助として使い、正本を勝手に上書きしません。
 

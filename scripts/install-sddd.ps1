@@ -24,9 +24,13 @@ if (-not (Test-Path -LiteralPath $ProjectPath -PathType Container)) {
 $projectRoot = (Resolve-Path -LiteralPath $ProjectPath).Path
 
 function Copy-SdddItem {
-  param([string]$SourceRelativePath, [string]$DestinationRelativePath)
+  param(
+    [string]$SourceRelativePath,
+    [string]$DestinationRelativePath,
+    [string]$SourceRoot = $templateRoot
+  )
 
-  $source = Join-Path $templateRoot $SourceRelativePath
+  $source = Join-Path $SourceRoot $SourceRelativePath
   $destination = Join-Path $projectRoot $DestinationRelativePath
 
   if (-not (Test-Path -LiteralPath $source)) {
@@ -72,6 +76,11 @@ if ($WithGitHub) {
 foreach ($item in $items) {
   Copy-SdddItem -SourceRelativePath $item.Source -DestinationRelativePath $item.Destination
 }
+
+# Codex discovers repository skills from .agents/skills. Install each skill
+# additively so an existing .agents/skills directory is never replaced.
+Copy-SdddItem -SourceRelativePath '.agents/skills/kaigi' -DestinationRelativePath '.agents/skills/kaigi' -SourceRoot $repoRoot
+Copy-SdddItem -SourceRelativePath '.agents/skills/kaigi2' -DestinationRelativePath '.agents/skills/kaigi2' -SourceRoot $repoRoot
 
 $gitignore = Join-Path $projectRoot '.gitignore'
 $ignoreEntries = @('.sddd/', '.codegraph/')

@@ -34,7 +34,8 @@ project_root=$(CDPATH= cd -- "$project_path" && pwd)
 copy_item() {
   source_rel=$1
   destination_rel=$2
-  source="$template_root/$source_rel"
+  source_root=${3:-$template_root}
+  source="$source_root/$source_rel"
   destination="$project_root/$destination_rel"
 
   [ -e "$source" ] || { echo "Template not found: $source" >&2; exit 1; }
@@ -62,6 +63,11 @@ copy_item "docs/automation.md" "docs/automation.md"
 copy_item "docs/collaboration.md" "docs/collaboration.md"
 copy_item "docs/spec" "docs/spec"
 copy_item "handover" "docs/handover"
+
+# Codex discovers repository skills from .agents/skills. Install each skill
+# additively so an existing .agents/skills directory is never replaced.
+copy_item ".agents/skills/kaigi" ".agents/skills/kaigi" "$repo_root"
+copy_item ".agents/skills/kaigi2" ".agents/skills/kaigi2" "$repo_root"
 
 if [ "$without_claude" = false ]; then
   copy_item "CLAUDE.md" "CLAUDE.md"

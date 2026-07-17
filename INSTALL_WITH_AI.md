@@ -68,6 +68,15 @@ task.md
 
 Claude Code用を入れた場合は `CLAUDE.md` と `.claude/commands/`、GitHub協業用を入れた場合は `.github/` も確認する。
 
+Codex用の会議Skillとして、次も確認する。
+
+```text
+.agents/skills/kaigi/SKILL.md
+.agents/skills/kaigi2/SKILL.md
+```
+
+Codexでは `$kaigi` が単一コンテキストの軽量会議、`$kaigi2` が独立Agentを使う高品質会議である。Claude Codeでは対応する `/kaigi` と `/kaigi2` を使う。
+
 `.gitignore` に `.sddd/` と `.codegraph/` が含まれていることも確認する。これらは再生成できるローカル補助データであり、既定ではGit管理しない。
 
 ### 5. 導入直後にすること
