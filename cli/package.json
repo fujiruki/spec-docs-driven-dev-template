@@ -1,0 +1,16 @@
+{
+  "name": "sddd-cli",
+  "version": "0.1.0",
+  "description": "Read-only preflight tools for SdDD projects",
+  "type": "module",
+  "bin": {
+    "sddd": "src/cli.mjs"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

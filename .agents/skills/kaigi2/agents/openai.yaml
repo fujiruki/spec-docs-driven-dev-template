@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaigi 2"
+  short_description: "Run an adversarial multi-agent expert meeting"
+  default_prompt: "Use $kaigi2 to run an independent multi-agent expert review of this decision."

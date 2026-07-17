@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaigi"
+  short_description: "Run a structured expert meeting in one context"
+  default_prompt: "Use $kaigi to evaluate this decision from multiple expert perspectives."
